@@ -1,0 +1,444 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="./bootstrap.min.css">
+        <title>Function x.countPrimes</title>
+        <meta charset="UTF-8">
+        <style>
+         dl.row { margin-left: 1.5em; margin-right:1.5em }
+         dd { margin-left: 1.5em }
+        </style>
+    </head>
+    <body>
+        <script src="./cytoscape.js"></script>
+        <script src="./dagre.js"></script>
+        <script src="./cytoscape-dagre.js"></script>
+        <script src="./jquery-3.4.1.slim.min.js"></script>
+        <script src="./popper.min.js"></script>
+        <script src="./bootstrap.min.js"></script>
+
+        <div style="position: absolute; left: .5em; right: .5em; top: .5em; bottom: .5em;" id="cy"></div>
+
+        <h1 style="position: absolute; right: .5em; top: .5em; font-family: Hack">OpenRNSAnalyzer</h1>
+        <span style="position: absolute; right: .5em; bottom: .5em; font-family: Hack">Currently Highlighted: <span id="highlight-type"></span><span id="highlight-obj"></span></span>
+
+        <div class="card shadow rounded text-white bg-secondary" style="min-height: 30em; width: 30em; position: absolute; left: 1em; top: 1em; opacity:0.8" id="info">
+            <div class="card-header">Function x.countPrimes</div>
+            <div class="card-body">
+                <b>Disassembly: </b><samp id="disasm"></samp><br>
+                <b>Code: </b><samp id="line"></samp><br>
+                <b>ESIL: </b><samp id="esil"></samp><br>
+                <b>Tainted Registers: </b><div id="tainted"></div><br>
+                <b>This Node taints: </b><div id="added"></div><br>
+                <b>This Node untaints: </b><div id="removed"></div><br>
+                <b>This Node copies: </b><div id="copy"></div><br>
+                <b>This Node needs untainted Registers (Click to see reaching definitions): </b><div id="conversions"></div>
+            </div>
+            <div class="card-footer"><b>Selected Basic Block: </b><span id="selected">None</span></div>
+        </div>
+
+        <div class="dropend" style="position: absolute; bottom: 1em; left: 1em;">
+            <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                More Options...
+            </button>
+
+            <ul class="dropdown-menu">
+                <a class="dropdown-item" href="index.html">
+                    Select Function
+                </a>
+                <a class="dropdown-item"
+                   data-bs-toggle="modal" data-bs-target="#highlight-reg">
+                    Highlight Tainted Reg
+                </a>
+                <a class="dropdown-item"
+                   data-bs-toggle="modal" data-bs-target="#highlight-tainting-nodes">
+                    Highlight Tainting Node
+                </a>
+                
+                <div class="dropdown-item"
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" onchange="if(this.checked){cy.$('node').lock();cy.$('edge').lock();}else{cy.$('node').unlock();cy.$('edge').unlock();}" checked>
+                        <label class="form-check-label" for="flexSwitchCheckChecked">Lock nodes</label>
+                    </div>
+                </div>
+            </ul>
+        </div>
+
+        <div class="modal" id="highlight-reg">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">Highlight Tainted Reg</div>
+                    <div class="modal-body">
+                        <div class="list-group" id="select-list">
+                            <a class="list-group-item list-group-item-action active" onclick="highlightReg(undefined)">None</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a0')">a0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a1')">a1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a2')">a2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a3')">a3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a4')">a4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a5')">a5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a6')">a6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('a7')">a7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('cycle')">cycle</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('cycleh')">cycleh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dz')">dz</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa0')">fa0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa1')">fa1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa2')">fa2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa3')">fa3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa4')">fa4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa5')">fa5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa6')">fa6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fa7')">fa7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fcsr')">fcsr</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fflags')">fflags</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('frm')">frm</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs0')">fs0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs1')">fs1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs10')">fs10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs11')">fs11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs2')">fs2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs3')">fs3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs4')">fs4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs5')">fs5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs6')">fs6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs7')">fs7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs8')">fs8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs9')">fs9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft0')">ft0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft1')">ft1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft10')">ft10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft11')">ft11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft2')">ft2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft3')">ft3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft4')">ft4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft5')">ft5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft6')">ft6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft7')">ft7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft8')">ft8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ft9')">ft9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('gp')">gp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('instret')">instret</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('instreth')">instreth</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('nv')">nv</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('nx')">nx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('of')">of</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('pc')">pc</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ra')">ra</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s0')">s0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s1')">s1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s10')">s10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s11')">s11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s2')">s2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s3')">s3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s4')">s4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s5')">s5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s6')">s6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s7')">s7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s8')">s8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('s9')">s9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('sp')">sp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('t0')">t0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('t1')">t1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('t2')">t2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('t3')">t3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('t4')">t4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('t5')">t5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('t6')">t6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('time')">time</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('timeh')">timeh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('tp')">tp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('uf')">uf</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="highlight-tainting-nodes">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">Highlight Tainting Node</div>
+                    <div class="modal-body">
+                        <div class="list-group" id="select-list-tainting">
+                            <a class="list-group-item list-group-item-action active" onclick="highlightReg(undefined)">None</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a0')">a0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a1')">a1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a2')">a2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a3')">a3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a4')">a4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a5')">a5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a6')">a6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('a7')">a7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('cycle')">cycle</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('cycleh')">cycleh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dz')">dz</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa0')">fa0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa1')">fa1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa2')">fa2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa3')">fa3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa4')">fa4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa5')">fa5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa6')">fa6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fa7')">fa7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fcsr')">fcsr</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fflags')">fflags</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('frm')">frm</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs0')">fs0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs1')">fs1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs10')">fs10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs11')">fs11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs2')">fs2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs3')">fs3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs4')">fs4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs5')">fs5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs6')">fs6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs7')">fs7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs8')">fs8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs9')">fs9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft0')">ft0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft1')">ft1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft10')">ft10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft11')">ft11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft2')">ft2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft3')">ft3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft4')">ft4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft5')">ft5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft6')">ft6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft7')">ft7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft8')">ft8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ft9')">ft9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('gp')">gp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('instret')">instret</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('instreth')">instreth</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('nv')">nv</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('nx')">nx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('of')">of</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('pc')">pc</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ra')">ra</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s0')">s0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s1')">s1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s10')">s10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s11')">s11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s2')">s2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s3')">s3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s4')">s4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s5')">s5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s6')">s6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s7')">s7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s8')">s8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('s9')">s9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('sp')">sp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('t0')">t0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('t1')">t1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('t2')">t2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('t3')">t3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('t4')">t4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('t5')">t5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('t6')">t6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('time')">time</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('timeh')">timeh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('tp')">tp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('uf')">uf</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="metric-modal">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">Metrics</div>
+                    <div class="modal-body" id="metric-div">
+                        <dl class="row" id="metric-list">
+                        </dl >
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+         var graph = {"nodes":[{"data":{"id":"1472","label":"sext.w a5, a5","color":"lightgrey"}},{"data":{"id":"1500","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1444","label":"sw a5, -32(s0)","color":"lightgrey"}},{"data":{"id":"1624","label":"lw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1698","label":"sw a5, -28(s0)","color":"lightgrey"}},{"data":{"id":"1658","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1552","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1696","label":"addiw a5, a5, 1","color":"lightgrey"}},{"data":{"id":"1678","label":"lw a5, -24(s0)","color":"lightgrey"}},{"data":{"id":"1356","label":"sd s0, 376(sp)","color":"lightgrey"}},{"data":{"id":"1684","label":"sw a5, -24(s0)","color":"lightgrey"}},{"data":{"id":"1380","label":"addiw a5, a5, 1","color":"lightgrey"}},{"data":{"id":"1376","label":"lw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1388","label":"sw a5, -24(s0)","color":"lightgrey"}},{"data":{"id":"1558","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1510","label":"sext.w a4, a5","color":"lightcoral"}},{"data":{"id":"1392","label":"li a5, 3","color":"lightgrey"}},{"data":{"id":"1486","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1600","label":"blt a4, a5, 0x5ae","color":"lightcoral"}},{"data":{"id":"1416","label":"lw a5, -32(s0)","color":"lightgrey"}},{"data":{"id":"1664","label":"sw a4, -360(a5)","color":"lightgrey"}},{"data":{"id":"1358","label":"addi s0, sp, 384","color":"lightgrey"}},{"data":{"id":"1424","label":"sext.w a4, a5","color":"lightcoral"}},{"data":{"id":"1528","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1406","label":"lw a5, -32(s0)","color":"lightgrey"}},{"data":{"id":"1534","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1546","label":"sext.w a5, a5","color":"lightgrey"}},{"data":{"id":"1592","label":"lw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1692","label":"lw a5, -28(s0)","color":"lightgrey"}},{"data":{"id":"1372","label":"sw a5, -376(s0)","color":"lightgrey"}},{"data":{"id":"1498","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1494","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1454","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1366","label":"sw a5, -208(s0)","color":"lightgrey"}},{"data":{"id":"1514","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1404","label":"j 0x588","color":"lightgrey"}},{"data":{"id":"1654","label":"lw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1714","label":"ret","color":"lightgrey"}},{"data":{"id":"1638","label":"sw a4, -192(a5)","color":"lightgrey"}},{"data":{"id":"1620","label":"blt a5, a4, 0x68e","color":"lightcoral"}},{"data":{"id":"1536","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1434","label":"ble a4, a5, 0x57e","color":"lightcoral"}},{"data":{"id":"1480","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1662","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1478","label":"j 0x5f8","color":"lightgrey"}},{"data":{"id":"1538","label":"lw a4, -360(a5)","color":"lightgrey"}},{"data":{"id":"1596","label":"sext.w a4, a4","color":"lightgrey"}},{"data":{"id":"1682","label":"addiw a5, a5, 1","color":"lightgrey"}},{"data":{"id":"1484","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1580","label":"addiw a5, a5, 1","color":"lightgrey"}},{"data":{"id":"1668","label":"lw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1612","label":"sext.w a4, a5","color":"lightgrey"}},{"data":{"id":"1556","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1632","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1394","label":"sw a5, -28(s0)","color":"lightgrey"}},{"data":{"id":"1710","label":"ld s0, 376(sp)","color":"lightgrey"}},{"data":{"id":"1412","label":"sw a5, -32(s0)","color":"lightgrey"}},{"data":{"id":"1468","label":"lw a5, -32(s0)","color":"lightgrey"}},{"data":{"id":"1674","label":"sw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1458","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1688","label":"j 0x69c","color":"lightgrey"}},{"data":{"id":"1448","label":"sw zero, -36(s0)","color":"lightgrey"}},{"data":{"id":"1562","label":"lw a4, -360(a5)","color":"lightgrey"}},{"data":{"id":"1634","label":"lw a4, -28(s0)","color":"lightgrey"}},{"data":{"id":"1604","label":"j 0x6a8","color":"lightgrey"}},{"data":{"id":"1572","label":"beq a5, a4, 0x69a","color":"lightcoral"}},{"data":{"id":"1504","label":"lw a5, -192(a5)","color":"lightgrey"}},{"data":{"id":"1672","label":"addiw a5, a5, 1","color":"lightgrey"}},{"data":{"id":"1508","label":"addw a5, a5, a4","color":"lightgrey"}},{"data":{"id":"1442","label":"addiw a5, a5, -1","color":"lightgrey"}},{"data":{"id":"1420","label":"mulw a5, a5, a5","color":"lightgrey"}},{"data":{"id":"1432","label":"sext.w a5, a5","color":"lightgrey"}},{"data":{"id":"1616","label":"li a5, 41","color":"lightgrey"}},{"data":{"id":"1570","label":"sext.w a5, a5","color":"lightgrey"}},{"data":{"id":"1548","label":"blt a4, a5, 0x5c8","color":"lightcoral"}},{"data":{"id":"1370","label":"li a5, 4","color":"lightgrey"}},{"data":{"id":"1462","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1354","label":"addi sp, sp, -384","color":"lightgrey"}},{"data":{"id":"1410","label":"addiw a5, a5, 1","color":"lightgrey"}},{"data":{"id":"1628","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1606","label":"nop","color":"lightgrey"}},{"data":{"id":"1364","label":"li a5, 2","color":"lightgrey"}},{"data":{"id":"1490","label":"lw a4, -360(a5)","color":"lightgrey"}},{"data":{"id":"1532","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1702","label":"j 0x588","color":"lightgrey"}},{"data":{"id":"1630","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1518","label":"slli a5, a5, 0x2","color":"lightgrey"}},{"data":{"id":"1566","label":"lw a5, -28(s0)","color":"lightgrey"}},{"data":{"id":"1460","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1488","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1520","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1502","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1646","label":"mulw a5, a5, a5","color":"lightgrey"}},{"data":{"id":"1708","label":"mv a0, a5","color":"lightgrey"}},{"data":{"id":"1452","label":"j 0x632","color":"lightgrey"}},{"data":{"id":"1598","label":"sext.w a5, a5","color":"lightgrey"}},{"data":{"id":"1660","label":"addi a5, a5, -16","color":"lightgrey"}},{"data":{"id":"1582","label":"sw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1382","label":"sw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1712","label":"addi sp, sp, 384","color":"lightgrey"}},{"data":{"id":"1400","label":"sw a5, -32(s0)","color":"lightgrey"}},{"data":{"id":"1560","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1438","label":"lw a5, -32(s0)","color":"lightgrey"}},{"data":{"id":"1642","label":"lw a5, -28(s0)","color":"lightgrey"}},{"data":{"id":"1398","label":"li a5, 2","color":"lightgrey"}},{"data":{"id":"1608","label":"lw a5, -20(s0)","color":"lightgrey"}},{"data":{"id":"1522","label":"add a5, a5, s0","color":"lightgrey"}},{"data":{"id":"1590","label":"mv a4, a5","color":"lightgrey"}},{"data":{"id":"1650","label":"sext.w a4, a5","color":"lightcoral"}},{"data":{"id":"1524","label":"sw a4, -360(a5)","color":"lightgrey"}},{"data":{"id":"1360","label":"sw zero, -20(s0)","color":"lightgrey"}},{"data":{"id":"1690","label":"nop","color":"lightgrey"}},{"data":{"id":"1704","label":"lw a5, -24(s0)","color":"lightgrey"}},{"data":{"id":"1386","label":"li a5, 1","color":"lightgrey"}},{"data":{"id":"1464","label":"lw a4, -192(a5)","color":"lightgrey"}},{"data":{"id":"1474","label":"blt a5, a4, 0x646","color":"lightcoral"}},{"data":{"id":"1428","label":"lw a5, -28(s0)","color":"lightgrey"}},{"data":{"id":"1542","label":"lw a5, -28(s0)","color":"lightgrey"}},{"data":{"id":"1586","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"1576","label":"lw a5, -36(s0)","color":"lightgrey"}},{"data":{"id":"exit","label":"EXIT NODE","color":"black"}}],"edges":[{"data":{"id":"1472_1474","source":"1472","target":"1474","color":"darkred"}},{"data":{"id":"1500_1502","source":"1500","target":"1502","color":"darkred"}},{"data":{"id":"1444_1448","source":"1444","target":"1448","color":"darkred"}},{"data":{"id":"1624_1628","source":"1624","target":"1628","color":"darkred"}},{"data":{"id":"1698_1702","source":"1698","target":"1702","color":"darkred"}},{"data":{"id":"1658_1660","source":"1658","target":"1660","color":"darkred"}},{"data":{"id":"1552_1556","source":"1552","target":"1556","color":"darkred"}},{"data":{"id":"1696_1698","source":"1696","target":"1698","color":"darkred"}},{"data":{"id":"1678_1682","source":"1678","target":"1682","color":"darkred"}},{"data":{"id":"1356_1358","source":"1356","target":"1358","color":"darkred"}},{"data":{"id":"1684_1688","source":"1684","target":"1688","color":"darkred"}},{"data":{"id":"1380_1382","source":"1380","target":"1382","color":"darkred"}},{"data":{"id":"1376_1380","source":"1376","target":"1380","color":"darkred"}},{"data":{"id":"1388_1392","source":"1388","target":"1392","color":"darkred"}},{"data":{"id":"1558_1560","source":"1558","target":"1560","color":"darkred"}},{"data":{"id":"1510_1514","source":"1510","target":"1514","color":"darkred"}},{"data":{"id":"1392_1394","source":"1392","target":"1394","color":"darkred"}},{"data":{"id":"1486_1488","source":"1486","target":"1488","color":"darkred"}},{"data":{"id":"1600_1454","source":"1600","target":"1454","color":"darkgreen"}},{"data":{"id":"1600_1604","source":"1600","target":"1604","color":"darkred"}},{"data":{"id":"1416_1420","source":"1416","target":"1420","color":"darkred"}},{"data":{"id":"1664_1668","source":"1664","target":"1668","color":"darkred"}},{"data":{"id":"1358_1360","source":"1358","target":"1360","color":"darkred"}},{"data":{"id":"1424_1428","source":"1424","target":"1428","color":"darkred"}},{"data":{"id":"1528_1532","source":"1528","target":"1532","color":"darkred"}},{"data":{"id":"1406_1410","source":"1406","target":"1410","color":"darkred"}},{"data":{"id":"1534_1536","source":"1534","target":"1536","color":"darkred"}},{"data":{"id":"1546_1548","source":"1546","target":"1548","color":"darkred"}},{"data":{"id":"1592_1596","source":"1592","target":"1596","color":"darkred"}},{"data":{"id":"1692_1696","source":"1692","target":"1696","color":"darkred"}},{"data":{"id":"1372_1376","source":"1372","target":"1376","color":"darkred"}},{"data":{"id":"1498_1500","source":"1498","target":"1500","color":"darkred"}},{"data":{"id":"1494_1498","source":"1494","target":"1498","color":"darkred"}},{"data":{"id":"1454_1458","source":"1454","target":"1458","color":"darkred"}},{"data":{"id":"1366_1370","source":"1366","target":"1370","color":"darkred"}},{"data":{"id":"1514_1518","source":"1514","target":"1518","color":"darkred"}},{"data":{"id":"1404_1416","source":"1404","target":"1416","color":"darkgreen"}},{"data":{"id":"1654_1658","source":"1654","target":"1658","color":"darkred"}},{"data":{"id":"1714_exit","source":"1714","target":"exit","color":"pink"}},{"data":{"id":"1638_1642","source":"1638","target":"1642","color":"darkred"}},{"data":{"id":"1620_1678","source":"1620","target":"1678","color":"darkgreen"}},{"data":{"id":"1620_1624","source":"1620","target":"1624","color":"darkred"}},{"data":{"id":"1536_1538","source":"1536","target":"1538","color":"darkred"}},{"data":{"id":"1434_1406","source":"1434","target":"1406","color":"darkgreen"}},{"data":{"id":"1434_1438","source":"1434","target":"1438","color":"darkred"}},{"data":{"id":"1480_1484","source":"1480","target":"1484","color":"darkred"}},{"data":{"id":"1662_1664","source":"1662","target":"1664","color":"darkred"}},{"data":{"id":"1478_1528","source":"1478","target":"1528","color":"darkgreen"}},{"data":{"id":"1538_1542","source":"1538","target":"1542","color":"darkred"}},{"data":{"id":"1596_1598","source":"1596","target":"1598","color":"darkred"}},{"data":{"id":"1682_1684","source":"1682","target":"1684","color":"darkred"}},{"data":{"id":"1484_1486","source":"1484","target":"1486","color":"darkred"}},{"data":{"id":"1580_1582","source":"1580","target":"1582","color":"darkred"}},{"data":{"id":"1668_1672","source":"1668","target":"1672","color":"darkred"}},{"data":{"id":"1612_1616","source":"1612","target":"1616","color":"darkred"}},{"data":{"id":"1556_1558","source":"1556","target":"1558","color":"darkred"}},{"data":{"id":"1632_1634","source":"1632","target":"1634","color":"darkred"}},{"data":{"id":"1394_1398","source":"1394","target":"1398","color":"darkred"}},{"data":{"id":"1710_1712","source":"1710","target":"1712","color":"darkred"}},{"data":{"id":"1412_1416","source":"1412","target":"1416","color":"darkgreen"}},{"data":{"id":"1468_1472","source":"1468","target":"1472","color":"darkred"}},{"data":{"id":"1674_1678","source":"1674","target":"1678","color":"darkgreen"}},{"data":{"id":"1458_1460","source":"1458","target":"1460","color":"darkred"}},{"data":{"id":"1688_1692","source":"1688","target":"1692","color":"darkgreen"}},{"data":{"id":"1448_1452","source":"1448","target":"1452","color":"darkred"}},{"data":{"id":"1562_1566","source":"1562","target":"1566","color":"darkred"}},{"data":{"id":"1634_1638","source":"1634","target":"1638","color":"darkred"}},{"data":{"id":"1604_1704","source":"1604","target":"1704","color":"darkgreen"}},{"data":{"id":"1572_1690","source":"1572","target":"1690","color":"darkgreen"}},{"data":{"id":"1572_1576","source":"1572","target":"1576","color":"darkred"}},{"data":{"id":"1504_1508","source":"1504","target":"1508","color":"darkred"}},{"data":{"id":"1672_1674","source":"1672","target":"1674","color":"darkred"}},{"data":{"id":"1508_1510","source":"1508","target":"1510","color":"darkred"}},{"data":{"id":"1442_1444","source":"1442","target":"1444","color":"darkred"}},{"data":{"id":"1420_1424","source":"1420","target":"1424","color":"darkred"}},{"data":{"id":"1432_1434","source":"1432","target":"1434","color":"darkred"}},{"data":{"id":"1616_1620","source":"1616","target":"1620","color":"darkred"}},{"data":{"id":"1570_1572","source":"1570","target":"1572","color":"darkred"}},{"data":{"id":"1548_1480","source":"1548","target":"1480","color":"darkgreen"}},{"data":{"id":"1548_1552","source":"1548","target":"1552","color":"darkred"}},{"data":{"id":"1370_1372","source":"1370","target":"1372","color":"darkred"}},{"data":{"id":"1462_1464","source":"1462","target":"1464","color":"darkred"}},{"data":{"id":"1354_1356","source":"1354","target":"1356","color":"darkred"}},{"data":{"id":"1410_1412","source":"1410","target":"1412","color":"darkred"}},{"data":{"id":"1628_1630","source":"1628","target":"1630","color":"darkred"}},{"data":{"id":"1606_1608","source":"1606","target":"1608","color":"darkred"}},{"data":{"id":"1364_1366","source":"1364","target":"1366","color":"darkred"}},{"data":{"id":"1490_1494","source":"1490","target":"1494","color":"darkred"}},{"data":{"id":"1532_1534","source":"1532","target":"1534","color":"darkred"}},{"data":{"id":"1702_1416","source":"1702","target":"1416","color":"darkgreen"}},{"data":{"id":"1630_1632","source":"1630","target":"1632","color":"darkred"}},{"data":{"id":"1518_1520","source":"1518","target":"1520","color":"darkred"}},{"data":{"id":"1566_1570","source":"1566","target":"1570","color":"darkred"}},{"data":{"id":"1460_1462","source":"1460","target":"1462","color":"darkred"}},{"data":{"id":"1488_1490","source":"1488","target":"1490","color":"darkred"}},{"data":{"id":"1520_1522","source":"1520","target":"1522","color":"darkred"}},{"data":{"id":"1502_1504","source":"1502","target":"1504","color":"darkred"}},{"data":{"id":"1646_1650","source":"1646","target":"1650","color":"darkred"}},{"data":{"id":"1708_1710","source":"1708","target":"1710","color":"darkred"}},{"data":{"id":"1452_1586","source":"1452","target":"1586","color":"darkgreen"}},{"data":{"id":"1598_1600","source":"1598","target":"1600","color":"darkred"}},{"data":{"id":"1660_1662","source":"1660","target":"1662","color":"darkred"}},{"data":{"id":"1582_1586","source":"1582","target":"1586","color":"darkgreen"}},{"data":{"id":"1382_1386","source":"1382","target":"1386","color":"darkred"}},{"data":{"id":"1712_1714","source":"1712","target":"1714","color":"darkred"}},{"data":{"id":"1400_1404","source":"1400","target":"1404","color":"darkred"}},{"data":{"id":"1560_1562","source":"1560","target":"1562","color":"darkred"}},{"data":{"id":"1438_1442","source":"1438","target":"1442","color":"darkred"}},{"data":{"id":"1642_1646","source":"1642","target":"1646","color":"darkred"}},{"data":{"id":"1398_1400","source":"1398","target":"1400","color":"darkred"}},{"data":{"id":"1608_1612","source":"1608","target":"1612","color":"darkred"}},{"data":{"id":"1522_1524","source":"1522","target":"1524","color":"darkred"}},{"data":{"id":"1590_1592","source":"1590","target":"1592","color":"darkred"}},{"data":{"id":"1650_1654","source":"1650","target":"1654","color":"darkred"}},{"data":{"id":"1524_1528","source":"1524","target":"1528","color":"darkgreen"}},{"data":{"id":"1360_1364","source":"1360","target":"1364","color":"darkred"}},{"data":{"id":"1690_1692","source":"1690","target":"1692","color":"darkgreen"}},{"data":{"id":"1704_1708","source":"1704","target":"1708","color":"darkred"}},{"data":{"id":"1386_1388","source":"1386","target":"1388","color":"darkred"}},{"data":{"id":"1464_1468","source":"1464","target":"1468","color":"darkred"}},{"data":{"id":"1474_1606","source":"1474","target":"1606","color":"darkgreen"}},{"data":{"id":"1474_1478","source":"1474","target":"1478","color":"darkred"}},{"data":{"id":"1428_1432","source":"1428","target":"1432","color":"darkred"}},{"data":{"id":"1542_1546","source":"1542","target":"1546","color":"darkred"}},{"data":{"id":"1586_1590","source":"1586","target":"1590","color":"darkred"}},{"data":{"id":"1576_1580","source":"1576","target":"1580","color":"darkred"}}]};
+         var dfm = {"1444":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:113\n"},"1604":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":["pc"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:119\n"},"1452":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":["pc"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114\n"},"1630":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:122\n"},"1386":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:110\n"},"1558":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:117\n"},"1514":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1388":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:110\n"},"1674":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:124\n"},"1382":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:109\n"},"1510":{"state":["a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a4"],"removed_regs":[],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1434":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["a4","a5"],"line":"countPrimes\nprimecount.c:112 (discriminator 1)\n"},"1638":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:122\n"},"1354":{"state":[],"state_outgoing":["sp"],"added_regs":["sp"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:106\n"},"1620":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["a4","a5"],"line":"countPrimes\nprimecount.c:121\n"},"1634":{"state":["a4","a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":["a4"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:122\n"},"1710":{"state":["a4","s0","sp"],"state_outgoing":["a4","sp"],"added_regs":[],"removed_regs":["s0"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:131\n"},"1420":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:112 (discriminator 1)\n"},"1478":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":["pc"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116\n"},"1712":{"state":["a4","sp"],"state_outgoing":["a4","sp"],"added_regs":["sp"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:131\n"},"1702":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":["pc"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112\n"},"1664":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:123\n"},"1536":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1688":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":["pc"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:126\n"},"1628":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:122\n"},"1412":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112 (discriminator 2)\n"},"1522":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1372":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:109\n"},"1438":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:113\n"},"1660":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:123\n"},"1524":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1392":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:110\n"},"1642":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:123\n"},"1668":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:124\n"},"1518":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1658":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:123\n"},"1682":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:126\n"},"1684":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:126\n"},"1704":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:130\n"},"1534":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1488":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1548":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["a4","a5"],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1360":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:108\n"},"1556":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:117\n"},"1538":{"state":["a4","a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":["a4"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1416":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112 (discriminator 1)\n"},"1566":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:117\n"},"1662":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:123\n"},"1672":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:124\n"},"1528":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1520":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1504":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1494":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1586":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 1)\n"},"1580":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 2)\n"},"1532":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1376":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:109\n"},"1596":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":["a4"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 1)\n"},"1474":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["a4","a5"],"line":"countPrimes\nprimecount.c:115\n"},"1432":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112 (discriminator 1)\n"},"1608":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:121\n"},"1616":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:121\n"},"1480":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1464":{"state":["a4","a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":["a4"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:115\n"},"1460":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:115\n"},"1646":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:123\n"},"1612":{"state":["s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":["a4"],"removed_regs":[],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:121\n"},"1490":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":["a4"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1468":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:115\n"},"1508":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":["a4","a5"],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1650":{"state":["a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a4"],"removed_regs":[],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:123\n"},"1428":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112 (discriminator 1)\n"},"1358":{"state":["sp"],"state_outgoing":["s0","sp"],"added_regs":["s0"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:106\n"},"1552":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:117\n"},"1690":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:117\n"},"1472":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:115\n"},"1632":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:122\n"},"1366":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:109\n"},"1442":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:113\n"},"1576":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 2)\n"},"1406":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112 (discriminator 2)\n"},"1696":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:128\n"},"1486":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1572":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["a4","a5"],"line":"countPrimes\nprimecount.c:117\n"},"1560":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:117\n"},"1398":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:110\n"},"1590":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{"a5":["a4"]},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 1)\n"},"1562":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":["a4"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:117\n"},"1546":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1400":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:110\n"},"1484":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1654":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:123\n"},"1598":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 1)\n"},"1542":{"state":["a5","s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 1)\n"},"1502":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1582":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 2)\n"},"1394":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:110\n"},"1500":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1448":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114\n"},"1678":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:126\n"},"1592":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:114 (discriminator 1)\n"},"1356":{"state":["sp"],"state_outgoing":["sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:106\n"},"1454":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:115\n"},"1364":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:109\n"},"1458":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:115\n"},"1462":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:115\n"},"1692":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:128\n"},"1570":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:117\n"},"1698":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:128\n"},"1424":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a4"],"removed_regs":[],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:112 (discriminator 1)\n"},"1708":{"state":["a4","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{"a5":["a0"]},"conversions":[],"line":"countPrimes\nprimecount.c:131\n"},"1624":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:122\n"},"1600":{"state":["a4","a5","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["a4","a5"],"line":"countPrimes\nprimecount.c:114 (discriminator 1)\n"},"1380":{"state":["s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:109\n"},"1606":{"state":["a5","s0","sp"],"state_outgoing":["a5","s0","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:115\n"},"1714":{"state":["a4","sp"],"state_outgoing":["a4","sp"],"added_regs":[],"removed_regs":[],"copy_flow":{"ra":["pc"]},"conversions":[],"line":"countPrimes\nprimecount.c:131\n"},"1370":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:109\n"},"1404":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["pc"],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112\n"},"1498":{"state":["s0","sp"],"state_outgoing":["s0","sp"],"added_regs":[],"removed_regs":["a5"],"copy_flow":{},"conversions":["a5"],"line":"countPrimes\nprimecount.c:116 (discriminator 2)\n"},"1410":{"state":["a4","s0","sp"],"state_outgoing":["a4","a5","s0","sp"],"added_regs":["a5"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"countPrimes\nprimecount.c:112 (discriminator 2)\n"}};
+         var esil = {"1598":"a5, 0xffffffff, 0, &, +, a5, =, 32, a5, ~=","1372":"a5, s0, -376, +, =[4]","1572":"a4, a5, ==, $z, ?{, 0x69a, pc, =, }, ","1616":"41, 0, +, a5, =","1690":", ","1468":"s0, -32, +, [4], a5, =, 32, a5, ~=","1562":"a5, -360, +, [4], a4, =, 32, a4, ~=","1606":", ","1416":"s0, -32, +, [4], a5, =, 32, a5, ~=","1524":"a4, a5, -360, +, =[4]","1714":"ra, pc, =","1370":"4, a5, =","1484":"0x2, a5, <<, a5, =","1400":"a5, s0, -32, +, =[4]","1502":"a5, s0, +, a5, =","1638":"a4, a5, -192, +, =[4]","1510":"0, 0xffffffff, a5, &, +, a4, =, 32, a4, ~=","1560":"a5, s0, +, a5, =","1576":"s0, -36, +, [4], a5, =, 32, a5, ~=","1504":"a5, -192, +, [4], a5, =, 32, a5, ~=","1386":"1, a5, =","1444":"a5, s0, -32, +, =[4]","1620":"a4, a5, <, ?{, 0x68e, pc, =, }, ","1604":"0x6a8, pc, =","1688":"0x69c, pc, =","1434":"a4, a5, >=, ?{, 0x57e, pc, =, }, ","1438":"s0, -32, +, [4], a5, =, 32, a5, ~=","1354":"-384, sp, +, sp, =","1480":"s0, -36, +, [4], a5, =, 32, a5, ~=","1490":"a5, -360, +, [4], a4, =, 32, a4, ~=","1428":"s0, -28, +, [4], a5, =, 32, a5, ~=","1630":"a5, -16, +, a5, =","1376":"s0, -20, +, [4], a5, =, 32, a5, ~=","1678":"s0, -24, +, [4], a5, =, 32, a5, ~=","1380":"a5, 0xffffffff, 1, &, +, a5, =, 32, a5, ~=","1406":"s0, -32, +, [4], a5, =, 32, a5, ~=","1404":"0x588, pc, =","1580":"a5, 0xffffffff, 1, &, +, a5, =, 32, a5, ~=","1612":"0, 0xffffffff, a5, &, +, a4, =, 32, a4, ~=","1546":"a5, 0xffffffff, 0, &, +, a5, =, 32, a5, ~=","1628":"0x2, a5, <<, a5, =","1600":"a5, a4, <, ?{, 0x5ae, pc, =, }, ","1596":"a4, 0xffffffff, 0, &, +, a4, =, 32, a4, ~=","1708":"a5, a0, =","1360":"0, s0, -20, +, =[4]","1682":"a5, 0xffffffff, 1, &, +, a5, =, 32, a5, ~=","1514":"s0, -36, +, [4], a5, =, 32, a5, ~=","1394":"a5, s0, -28, +, =[4]","1532":"0x2, a5, <<, a5, =","1710":"sp, 376, +, [8], s0, =","1586":"s0, -36, +, [4], a5, =, 32, a5, ~=","1528":"s0, -36, +, [4], a5, =, 32, a5, ~=","1704":"s0, -24, +, [4], a5, =, 32, a5, ~=","1464":"a5, -192, +, [4], a4, =, 32, a4, ~=","1566":"s0, -28, +, [4], a5, =, 32, a5, ~=","1582":"a5, s0, -36, +, =[4]","1664":"a4, a5, -360, +, =[4]","1654":"s0, -20, +, [4], a5, =, 32, a5, ~=","1556":"0x2, a5, <<, a5, =","1460":"a5, -16, +, a5, =","1432":"a5, 0xffffffff, 0, &, +, a5, =, 32, a5, ~=","1474":"a4, a5, <, ?{, 0x646, pc, =, }, ","1410":"a5, 0xffffffff, 1, &, +, a5, =, 32, a5, ~=","1702":"0x588, pc, =","1552":"s0, -36, +, [4], a5, =, 32, a5, ~=","1592":"s0, -20, +, [4], a5, =, 32, a5, ~=","1534":"a5, -16, +, a5, =","1472":"a5, 0xffffffff, 0, &, +, a5, =, 32, a5, ~=","1494":"s0, -36, +, [4], a5, =, 32, a5, ~=","1508":"0xffffffff, a5, &, 0xffffffff, a4, &, +, a5, =, 32, a5, ~=","1520":"a5, -16, +, a5, =","1684":"a5, s0, -24, +, =[4]","1366":"a5, s0, -208, +, =[4]","1646":"0xffffffff, a5, &, 0xffffffff, a5, &, *, a5, =, 32, a5, ~=","1452":"0x632, pc, =","1634":"s0, -28, +, [4], a4, =, 32, a4, ~=","1542":"s0, -28, +, [4], a5, =, 32, a5, ~=","1570":"a5, 0xffffffff, 0, &, +, a5, =, 32, a5, ~=","1424":"0, 0xffffffff, a5, &, +, a4, =, 32, a4, ~=","1632":"a5, s0, +, a5, =","1486":"a5, -16, +, a5, =","1674":"a5, s0, -20, +, =[4]","1488":"a5, s0, +, a5, =","1522":"a5, s0, +, a5, =","1668":"s0, -20, +, [4], a5, =, 32, a5, ~=","1382":"a5, s0, -20, +, =[4]","1548":"a5, a4, <, ?{, 0x5c8, pc, =, }, ","1498":"0x2, a5, <<, a5, =","1448":"0, s0, -36, +, =[4]","1364":"2, a5, =","1662":"a5, s0, +, a5, =","1358":"384, sp, +, s0, =","1412":"a5, s0, -32, +, =[4]","1608":"s0, -20, +, [4], a5, =, 32, a5, ~=","1442":"a5, 0xffffffff, -1, &, +, a5, =, 32, a5, ~=","1500":"a5, -16, +, a5, =","1518":"0x2, a5, <<, a5, =","1642":"s0, -28, +, [4], a5, =, 32, a5, ~=","1624":"s0, -20, +, [4], a5, =, 32, a5, ~=","1660":"a5, -16, +, a5, =","1538":"a5, -360, +, [4], a4, =, 32, a4, ~=","1388":"a5, s0, -24, +, =[4]","1478":"0x5f8, pc, =","1454":"s0, -36, +, [4], a5, =, 32, a5, ~=","1420":"0xffffffff, a5, &, 0xffffffff, a5, &, *, a5, =, 32, a5, ~=","1696":"a5, 0xffffffff, 1, &, +, a5, =, 32, a5, ~=","1672":"a5, 0xffffffff, 1, &, +, a5, =, 32, a5, ~=","1458":"0x2, a5, <<, a5, =","1392":"3, a5, =","1462":"a5, s0, +, a5, =","1698":"a5, s0, -28, +, =[4]","1658":"0x2, a5, <<, a5, =","1398":"2, a5, =","1558":"a5, -16, +, a5, =","1712":"384, sp, +, sp, =","1356":"s0, sp, 376, +, =[8]","1692":"s0, -28, +, [4], a5, =, 32, a5, ~=","1590":"a5, a4, =","1650":"0, 0xffffffff, a5, &, +, a4, =, 32, a4, ~=","1536":"a5, s0, +, a5, ="};
+         var disasm = {"1434":"ble a4, a5, 0x57e","1356":"sd s0, 376(sp)","1358":"addi s0, sp, 384","1388":"sw a5, -24(s0)","1518":"slli a5, a5, 0x2","1558":"addi a5, a5, -16","1552":"lw a5, -36(s0)","1570":"sext.w a5, a5","1536":"add a5, a5, s0","1606":"nop","1714":"ret","1394":"sw a5, -28(s0)","1406":"lw a5, -32(s0)","1688":"j 0x69c","1702":"j 0x588","1582":"sw a5, -36(s0)","1398":"li a5, 2","1432":"sext.w a5, a5","1646":"mulw a5, a5, a5","1596":"sext.w a4, a4","1370":"li a5, 4","1660":"addi a5, a5, -16","1654":"lw a5, -20(s0)","1642":"lw a5, -28(s0)","1698":"sw a5, -28(s0)","1510":"sext.w a4, a5","1662":"add a5, a5, s0","1504":"lw a5, -192(a5)","1454":"lw a5, -36(s0)","1572":"beq a5, a4, 0x69a","1608":"lw a5, -20(s0)","1616":"li a5, 41","1650":"sext.w a4, a5","1600":"blt a4, a5, 0x5ae","1682":"addiw a5, a5, 1","1382":"sw a5, -20(s0)","1678":"lw a5, -24(s0)","1478":"j 0x5f8","1634":"lw a4, -28(s0)","1598":"sext.w a5, a5","1508":"addw a5, a5, a4","1712":"addi sp, sp, 384","1538":"lw a4, -360(a5)","1428":"lw a5, -28(s0)","1542":"lw a5, -28(s0)","1366":"sw a5, -208(s0)","1486":"addi a5, a5, -16","1524":"sw a4, -360(a5)","1708":"mv a0, a5","1438":"lw a5, -32(s0)","1684":"sw a5, -24(s0)","1386":"li a5, 1","1528":"lw a5, -36(s0)","1448":"sw zero, -36(s0)","1500":"addi a5, a5, -16","1462":"add a5, a5, s0","1632":"add a5, a5, s0","1472":"sext.w a5, a5","1692":"lw a5, -28(s0)","1444":"sw a5, -32(s0)","1592":"lw a5, -20(s0)","1412":"sw a5, -32(s0)","1452":"j 0x632","1620":"blt a5, a4, 0x68e","1494":"lw a5, -36(s0)","1560":"add a5, a5, s0","1404":"j 0x588","1672":"addiw a5, a5, 1","1502":"add a5, a5, s0","1514":"lw a5, -36(s0)","1546":"sext.w a5, a5","1364":"li a5, 2","1710":"ld s0, 376(sp)","1380":"addiw a5, a5, 1","1420":"mulw a5, a5, a5","1474":"blt a5, a4, 0x646","1562":"lw a4, -360(a5)","1498":"slli a5, a5, 0x2","1468":"lw a5, -32(s0)","1460":"addi a5, a5, -16","1604":"j 0x6a8","1658":"slli a5, a5, 0x2","1400":"sw a5, -32(s0)","1424":"sext.w a4, a5","1410":"addiw a5, a5, 1","1674":"sw a5, -20(s0)","1520":"addi a5, a5, -16","1556":"slli a5, a5, 0x2","1372":"sw a5, -376(s0)","1704":"lw a5, -24(s0)","1586":"lw a5, -36(s0)","1576":"lw a5, -36(s0)","1548":"blt a4, a5, 0x5c8","1484":"slli a5, a5, 0x2","1668":"lw a5, -20(s0)","1458":"slli a5, a5, 0x2","1488":"add a5, a5, s0","1696":"addiw a5, a5, 1","1376":"lw a5, -20(s0)","1566":"lw a5, -28(s0)","1690":"nop","1490":"lw a4, -360(a5)","1480":"lw a5, -36(s0)","1354":"addi sp, sp, -384","1628":"slli a5, a5, 0x2","1532":"slli a5, a5, 0x2","1664":"sw a4, -360(a5)","1580":"addiw a5, a5, 1","1392":"li a5, 3","1442":"addiw a5, a5, -1","1416":"lw a5, -32(s0)","1590":"mv a4, a5","1360":"sw zero, -20(s0)","1638":"sw a4, -192(a5)","1464":"lw a4, -192(a5)","1624":"lw a5, -20(s0)","1534":"addi a5, a5, -16","1630":"addi a5, a5, -16","1612":"sext.w a4, a5","1522":"add a5, a5, s0"};
+         var conv = {"1580":{},"1674":{},"1518":{},"1558":{},"1514":{},"1460":{},"1432":{},"1658":{},"1416":{},"1560":{},"1404":{},"1388":{},"1442":{},"1444":{},"1454":{},"1688":{},"1468":{},"1616":{},"1586":{},"1642":{},"1582":{},"1392":{},"1604":{},"1552":{},"1598":{},"1458":{},"1572":{"a5":["1570"]},"1696":{},"1620":{"a5":["1616"],"a4":["1612"]},"1708":{},"1532":{},"1412":{},"1548":{"a5":["1546"]},"1356":{},"1678":{},"1500":{},"1370":{},"1394":{},"1628":{},"1528":{},"1684":{},"1484":{},"1566":{},"1438":{},"1632":{},"1538":{},"1510":{"a5":["1508"]},"1534":{},"1400":{},"1536":{},"1682":{},"1424":{"a5":["1420"]},"1660":{},"1486":{},"1546":{},"1420":{},"1358":{},"1428":{},"1612":{},"1474":{"a5":["1472"]},"1462":{},"1702":{},"1600":{"a4":["1596"],"a5":["1598"]},"1542":{},"1562":{},"1406":{},"1448":{},"1692":{},"1556":{},"1712":{},"1638":{},"1452":{},"1376":{},"1398":{},"1410":{},"1592":{},"1624":{},"1606":{},"1502":{},"1360":{},"1364":{},"1570":{},"1704":{},"1386":{},"1668":{},"1596":{},"1382":{},"1522":{},"1478":{},"1608":{},"1714":{},"1508":{},"1464":{},"1690":{},"1366":{},"1354":{},"1710":{},"1672":{},"1634":{},"1380":{},"1504":{},"1494":{},"1472":{},"1630":{},"1524":{},"1480":{},"1520":{},"1488":{},"1434":{"a4":["1424"],"a5":["1432"]},"1498":{},"1590":{},"1650":{"a5":["1646"]},"1372":{},"1662":{},"1664":{},"1654":{},"1698":{},"1646":{},"1490":{},"1576":{}};
+         var indicators = null;
+
+
+         cytoscape({
+             container: document.getElementById('cy'),
+             elements: graph,
+             layout: {name: 'dagre'},
+             style: cytoscape.stylesheet()
+                             .selector('node')
+                             .css({
+                                 content: 'data(label)',
+                                 shape: 'roundrectangle',
+                                 'background-color': 'data(color)',
+                                 'text-valign': 'center',
+                                 'text-halign': 'center',
+                                 width: '15em',
+                                 height: '1.5em',
+                                 'border-width': '.1em',
+                                 'font-family': 'monospace'
+                             })
+                             .selector('edge')
+                             .css({
+                                 'line-color': 'data(color)',
+                                 'target-arrow-color': 'data(color)',
+                                 'target-arrow-shape': 'triangle',
+                                 'target-arrow-scale': 3.5,
+                                 'curve-style': 'bezier',
+                             }),
+             ready: function() { window.cy = this; }
+         });
+         cy.on('tap', 'node', function(evt) {
+             var id = evt.target.id();
+             $('#selected').text("0x" + parseInt(id, 10).toString(16));
+             $('#tainted').children().remove();
+             $('#tainted').append(
+                 $.map(dfm[id]['state'], (elem) => $('<span class="badge text-bg-light" style="margin-left:.5em;"></span>').text(elem)));
+             $('#added').children().remove();
+             $('#added').append(
+                 $.map(dfm[id]['added_regs'], (elem) => $('<span class="badge text-bg-danger" style="margin-left:.5em;"></span>').text(elem)));
+             $('#removed').children().remove();
+             $('#removed').append(
+                 $.map(dfm[id]['removed_regs'], (elem) => $('<span class="badge text-bg-success style="margin-left:.5em;"></span>').text(elem)));
+
+             $('#line').text(dfm[id]['line']);
+
+             $('#copy').children().remove();
+             for (source in dfm[id]['copy_flow']) {
+                 $('#copy').append($('<span class="badge text-bg-success style="margin-left:.5em;"></span>').text(source));
+                 $('#copy').append($('<span>→</span>'));
+                 $('#copy').append($.map(dfm[id]['copy_flow'][source], (elem) => $('<span class="badge text-bg-success style="margin-left:.5em;"></span>').text(elem)));
+                 $('#copy').append($('<br>'));
+             }
+
+
+
+             $('#conversions').children().remove();
+             $('#conversions').append(
+                 $.map(dfm[id]['conversions'], (elem) => $('<span class="badge text-bg-warning" style="margin-left:.5em;" onclick="highlightConversion(\'' + id + '\',\'' + elem + '\')" ></span>').text(elem)));
+             $('#disasm').text(disasm[id]);
+             $('#esil').text(esil[id]);
+         });
+         cy.$('node').lock();
+         cy.$('edge').lock();
+         function highlightReg(reg) {
+             resetHighlights();
+
+             $('#highlight-type').text("Nodes with following potentially tainted Register: ")
+             $('#highlight-obj').text(reg)
+
+             $('#select-list a').removeClass('active');
+             if (typeof reg !== 'undefined') {
+                 $.each(dfm, function (elem) {
+                     if (dfm[elem]['state'].includes(reg)) {
+                         cy.$('node[id="' + elem + '"]').css('border-color', 'red');
+                         cy.$('node[id="' + elem + '"]').css('border-width', '.5em');
+                     }
+                 })
+                 $('#select-list a').filter(function() {
+                     return $(this).text() == reg;
+                 }).addClass('active');
+             } else {
+                 $('#select-list a').filter(function() {
+                     return $(this).text() == "None";
+                 }).addClass('active');
+             }
+         }
+         function highlightTaintingNode(reg) {
+             resetHighlights();
+
+             $('#highlight-type').text("Nodes tainting following Register: ")
+             $('#highlight-obj').text(reg)
+
+             $('#select-list-tainting a').removeClass('active');
+             if (typeof reg !== 'undefined') {
+                 $.each(dfm, function (elem) {
+                     if (dfm[elem]['added_regs'].includes(reg)) {
+                         cy.$('node[id="' + elem + '"]').css('border-color', 'red');
+                         cy.$('node[id="' + elem + '"]').css('border-width', '.5em');
+                     }
+                     if (dfm[elem]['removed_regs'].includes(reg)) {
+                         cy.$('node[id="' + elem + '"]').css('border-color', 'green');
+                         cy.$('node[id="' + elem + '"]').css('border-width', '.5em');
+                     }
+                 })
+                 $('#select-list-tainting a').filter(function() {
+                     return $(this).text() == reg;
+                 }).addClass('active');
+             } else {
+                 $('#select-list-tainting a').filter(function() {
+                     return $(this).text() == "None";
+                 }).addClass('active');
+             }
+         }
+         function resetHighlights() {
+             cy.$('node').css('border-color', 'black');
+             cy.$('node').css('border-width', '.1em');
+         }
+
+         function highlightConversion(block, reg) {
+             resetHighlights();
+
+             $('#highlight-type').text("Conversion (in blue BB) because reaching definitions (from red BBs) for Reg: ");
+             $('#highlight-obj').text(reg + "(" + "0x" + parseInt(block, 10).toString(16)+ ")");
+
+             $('#select-list-tainting a').removeClass('active');
+             $('#select-list a').removeClass('active');
+
+             console.log(conv);
+             console.log(conv[block][reg]);
+             $.each(conv[block][reg], function (elem) {
+                console.log(elem);
+                 cy.$('node[id="' + conv[block][reg][elem] + '"]').css('border-color', 'red');
+                 cy.$('node[id="' + conv[block][reg][elem] + '"]').css('border-width', '.5em');
+             })
+            cy.$('node[id="' + block + '"]').css('border-color', 'blue');
+            cy.$('node[id="' + block + '"]').css('border-width', '.5em');
+         }
+
+         function calculate_scores() {
+             var ops = new Map(
+                 [      ['Min',    x => Math.min(...x)]
+                      , ['Max',    x => Math.max(...x)]
+                      , ['Mean',   x => x.reduce((a,b) => a + b, 0) / x.length]
+                      , ['Median', x => ((x.length % 2) ? (x[Math.floor(x.length / 2)]) : ((x[Math.floor(x.length / 2)] + x[Math.floor(x.length / 2) - 1]) / 2))]
+                      , ['Sum',    x => x.reduce((a,b) => a + b, 0)]
+                      , ['Count',  x => x.length]
+                 ]);
+
+             for (let [op1, fn1] of ops) {
+                 var txt1 = 'Critical Instructions ' + op1 + ': ';
+                 $('#metric-list').append($('<dt>' + txt1 + '</dt><dd class="' + op1 + '" + id="' + op1 + '"></dd>'));
+                 if (op1 == 'Count') {
+                     $('#' + op1).append("" + fn1(indicators['critical_insns']));
+                 } else {
+                    for (let [op2, fn2] of ops) {
+                        var txt2 = 'Pair ' + op2 + ': ';
+                        $('#' + op1).append($('<dl class="row"><dt>' + txt2 + '</dt><dd class="' + op2 + '" id="' + op1 + op2 + '"></dd></dl>'));
+                        if (op2 == 'Count') {
+                            $('#' + op1 + op2).append("" + fn1(indicators['critical_insns'].map(x => fn2(x['pairs']))));
+                        } else {
+                            for (let [op3, fn3] of ops) {
+                                var txt3 = 'Path Distance ' + op3 + ': ';
+                                $('#' + op1 + op2).append($('<dl class="row"><dt>' + txt3 + '</dt><dd class="' + op3 + '" id="' + op1 + op2 + op3 + '"></dd></dl>'));
+                                $('#' + op1 + op2 + op3).append("" +
+                                                                fn1(indicators['critical_insns'].map(x => fn2(x['pairs'].map(y => fn3(y['paths'].map(z => z['distance'])))))));
+                            }
+                        }
+                    }
+                 }
+             }
+         }
+
+
+         calculate_scores();
+        </script>
+        
+    </body>
+</html>

@@ -1,0 +1,560 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="./bootstrap.min.css">
+        <title>Function x.mmul</title>
+        <meta charset="UTF-8">
+        <style>
+         dl.row { margin-left: 1.5em; margin-right:1.5em }
+         dd { margin-left: 1.5em }
+        </style>
+    </head>
+    <body>
+        <script src="./cytoscape.js"></script>
+        <script src="./dagre.js"></script>
+        <script src="./cytoscape-dagre.js"></script>
+        <script src="./jquery-3.4.1.slim.min.js"></script>
+        <script src="./popper.min.js"></script>
+        <script src="./bootstrap.min.js"></script>
+
+        <div style="position: absolute; left: .5em; right: .5em; top: .5em; bottom: .5em;" id="cy"></div>
+
+        <h1 style="position: absolute; right: .5em; top: .5em; font-family: Hack">OpenRNSAnalyzer</h1>
+        <span style="position: absolute; right: .5em; bottom: .5em; font-family: Hack">Currently Highlighted: <span id="highlight-type"></span><span id="highlight-obj"></span></span>
+
+        <div class="card shadow rounded text-white bg-secondary" style="min-height: 30em; width: 30em; position: absolute; left: 1em; top: 1em; opacity:0.8" id="info">
+            <div class="card-header">Function x.mmul</div>
+            <div class="card-body">
+                <b>Disassembly: </b><samp id="disasm"></samp><br>
+                <b>Code: </b><samp id="line"></samp><br>
+                <b>ESIL: </b><samp id="esil"></samp><br>
+                <b>Tainted Registers: </b><div id="tainted"></div><br>
+                <b>This Node taints: </b><div id="added"></div><br>
+                <b>This Node untaints: </b><div id="removed"></div><br>
+                <b>This Node copies: </b><div id="copy"></div><br>
+                <b>This Node needs untainted Registers (Click to see reaching definitions): </b><div id="conversions"></div>
+            </div>
+            <div class="card-footer"><b>Selected Basic Block: </b><span id="selected">None</span></div>
+        </div>
+
+        <div class="dropend" style="position: absolute; bottom: 1em; left: 1em;">
+            <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                More Options...
+            </button>
+
+            <ul class="dropdown-menu">
+                <a class="dropdown-item" href="index.html">
+                    Select Function
+                </a>
+                <a class="dropdown-item"
+                   data-bs-toggle="modal" data-bs-target="#highlight-reg">
+                    Highlight Tainted Reg
+                </a>
+                <a class="dropdown-item"
+                   data-bs-toggle="modal" data-bs-target="#highlight-tainting-nodes">
+                    Highlight Tainting Node
+                </a>
+                
+                <div class="dropdown-item"
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" onchange="if(this.checked){cy.$('node').lock();cy.$('edge').lock();}else{cy.$('node').unlock();cy.$('edge').unlock();}" checked>
+                        <label class="form-check-label" for="flexSwitchCheckChecked">Lock nodes</label>
+                    </div>
+                </div>
+            </ul>
+        </div>
+
+        <div class="modal" id="highlight-reg">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">Highlight Tainted Reg</div>
+                    <div class="modal-body">
+                        <div class="list-group" id="select-list">
+                            <a class="list-group-item list-group-item-action active" onclick="highlightReg(undefined)">None</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('af')">af</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ah')">ah</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('al')">al</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ax')">ax</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('bh')">bh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('bl')">bl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('bp')">bp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('bpl')">bpl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('bx')">bx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('cf')">cf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ch')">ch</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('cl')">cl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('cs')">cs</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('cwd')">cwd</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('cx')">cx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('df')">df</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dh')">dh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('di')">di</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dil')">dil</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dl')">dl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dr0')">dr0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dr1')">dr1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dr2')">dr2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dr3')">dr3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dr6')">dr6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dr7')">dr7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ds')">ds</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('dx')">dx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('eax')">eax</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ebp')">ebp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ebx')">ebx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ecx')">ecx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('edi')">edi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('edx')">edx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('eflags')">eflags</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('es')">es</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('esi')">esi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('esp')">esp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fop')">fop</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('frdp')">frdp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('frip')">frip</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs')">fs</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('fs_base')">fs_base</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ftw')">ftw</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('gs')">gs</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('gs_base')">gs_base</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('if')">if</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('mxcr_mask')">mxcr_mask</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('mxcsr')">mxcsr</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('of')">of</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('pf')">pf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r10')">r10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r10b')">r10b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r10d')">r10d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r10w')">r10w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r11')">r11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r11b')">r11b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r11d')">r11d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r11w')">r11w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r12')">r12</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r12b')">r12b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r12d')">r12d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r12w')">r12w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r13')">r13</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r13b')">r13b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r13d')">r13d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r13w')">r13w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r14')">r14</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r14b')">r14b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r14d')">r14d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r14w')">r14w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r15')">r15</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r15b')">r15b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r15d')">r15d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r15w')">r15w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r8')">r8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r8b')">r8b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r8d')">r8d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r8w')">r8w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r9')">r9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r9b')">r9b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r9d')">r9d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('r9w')">r9w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rax')">rax</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rbp')">rbp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rbx')">rbx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rcx')">rcx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rdi')">rdi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rdx')">rdx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rflags')">rflags</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rip')">rip</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('riz')">riz</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rsi')">rsi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('rsp')">rsp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('sf')">sf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('si')">si</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('sil')">sil</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('sp')">sp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('spl')">spl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('ss')">ss</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st0')">st0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st1')">st1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st2')">st2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st3')">st3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st4')">st4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st5')">st5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st6')">st6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('st7')">st7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('swd')">swd</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('tf')">tf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('x64')">x64</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm0')">xmm0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm0h')">xmm0h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm0l')">xmm0l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm1')">xmm1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm1h')">xmm1h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm1l')">xmm1l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm2')">xmm2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm2h')">xmm2h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm2l')">xmm2l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm3')">xmm3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm3h')">xmm3h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm3l')">xmm3l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm4')">xmm4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm4h')">xmm4h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm4l')">xmm4l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm5')">xmm5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm5h')">xmm5h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm5l')">xmm5l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm6')">xmm6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm6h')">xmm6h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm6l')">xmm6l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm7')">xmm7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm7h')">xmm7h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('xmm7l')">xmm7l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightReg('zf')">zf</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="highlight-tainting-nodes">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">Highlight Tainting Node</div>
+                    <div class="modal-body">
+                        <div class="list-group" id="select-list-tainting">
+                            <a class="list-group-item list-group-item-action active" onclick="highlightReg(undefined)">None</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('af')">af</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ah')">ah</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('al')">al</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ax')">ax</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('bh')">bh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('bl')">bl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('bp')">bp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('bpl')">bpl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('bx')">bx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('cf')">cf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ch')">ch</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('cl')">cl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('cs')">cs</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('cwd')">cwd</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('cx')">cx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('df')">df</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dh')">dh</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('di')">di</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dil')">dil</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dl')">dl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dr0')">dr0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dr1')">dr1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dr2')">dr2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dr3')">dr3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dr6')">dr6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dr7')">dr7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ds')">ds</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('dx')">dx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('eax')">eax</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ebp')">ebp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ebx')">ebx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ecx')">ecx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('edi')">edi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('edx')">edx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('eflags')">eflags</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('es')">es</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('esi')">esi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('esp')">esp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fop')">fop</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('frdp')">frdp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('frip')">frip</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs')">fs</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('fs_base')">fs_base</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ftw')">ftw</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('gs')">gs</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('gs_base')">gs_base</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('if')">if</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('mxcr_mask')">mxcr_mask</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('mxcsr')">mxcsr</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('of')">of</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('pf')">pf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r10')">r10</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r10b')">r10b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r10d')">r10d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r10w')">r10w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r11')">r11</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r11b')">r11b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r11d')">r11d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r11w')">r11w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r12')">r12</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r12b')">r12b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r12d')">r12d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r12w')">r12w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r13')">r13</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r13b')">r13b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r13d')">r13d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r13w')">r13w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r14')">r14</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r14b')">r14b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r14d')">r14d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r14w')">r14w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r15')">r15</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r15b')">r15b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r15d')">r15d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r15w')">r15w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r8')">r8</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r8b')">r8b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r8d')">r8d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r8w')">r8w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r9')">r9</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r9b')">r9b</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r9d')">r9d</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('r9w')">r9w</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rax')">rax</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rbp')">rbp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rbx')">rbx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rcx')">rcx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rdi')">rdi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rdx')">rdx</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rflags')">rflags</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rip')">rip</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('riz')">riz</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rsi')">rsi</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('rsp')">rsp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('sf')">sf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('si')">si</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('sil')">sil</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('sp')">sp</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('spl')">spl</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('ss')">ss</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st0')">st0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st1')">st1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st2')">st2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st3')">st3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st4')">st4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st5')">st5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st6')">st6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('st7')">st7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('swd')">swd</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('tf')">tf</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('x64')">x64</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm0')">xmm0</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm0h')">xmm0h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm0l')">xmm0l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm1')">xmm1</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm1h')">xmm1h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm1l')">xmm1l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm2')">xmm2</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm2h')">xmm2h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm2l')">xmm2l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm3')">xmm3</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm3h')">xmm3h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm3l')">xmm3l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm4')">xmm4</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm4h')">xmm4h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm4l')">xmm4l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm5')">xmm5</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm5h')">xmm5h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm5l')">xmm5l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm6')">xmm6</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm6h')">xmm6h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm6l')">xmm6l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm7')">xmm7</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm7h')">xmm7h</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('xmm7l')">xmm7l</a>
+                            <a class="list-group-item list-group-item-action" onclick="highlightTaintingNode('zf')">zf</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="metric-modal">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">Metrics</div>
+                    <div class="modal-body" id="metric-div">
+                        <dl class="row" id="metric-list">
+                        </dl >
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+         var graph = {"nodes":[{"data":{"id":"4577","label":"add rax, rax","color":"lightgrey"}},{"data":{"id":"4460","label":"mov dword [rbp - 0x24], edi","color":"lightgrey"}},{"data":{"id":"4712","label":"lea rax, [rip + 0x2f31]","color":"lightgrey"}},{"data":{"id":"4527","label":"jmp 0x128d","color":"lightgrey"}},{"data":{"id":"4494","label":"jle 0x119e","color":"lightgrey"}},{"data":{"id":"4663","label":"movss dword [rbp - 0xc], xmm0","color":"lightgrey"}},{"data":{"id":"4505","label":"cmp eax, dword [rbp - 0x2c]","color":"lightgrey"}},{"data":{"id":"4659","label":"addss xmm0, xmm1","color":"lightgrey"}},{"data":{"id":"4752","label":"cmp eax, dword [rbp - 8]","color":"lightgrey"}},{"data":{"id":"4565","label":"movsxd rcx, eax","color":"lightgrey"}},{"data":{"id":"4739","label":"jl 0x11c0","color":"lightgrey"}},{"data":{"id":"4510","label":"mov eax, 0x3e7","color":"lightgrey"}},{"data":{"id":"4539","label":"jmp 0x127d","color":"lightgrey"}},{"data":{"id":"4749","label":"mov eax, dword [rbp - 0x18]","color":"lightgrey"}},{"data":{"id":"4654","label":"movss xmm1, dword [rbp - 0xc]","color":"lightgrey"}},{"data":{"id":"4508","label":"je 0x11a8","color":"lightgrey"}},{"data":{"id":"4745","label":"add dword [rbp - 0x18], 1","color":"lightgrey"}},{"data":{"id":"4457","label":"mov rbp, rsp","color":"lightgrey"}},{"data":{"id":"4627","label":"add rax, rcx","color":"lightgrey"}},{"data":{"id":"4496","label":"cmp dword [rbp - 4], 0","color":"lightgrey"}},{"data":{"id":"4548","label":"movss dword [rbp - 0xc], xmm0","color":"lightgrey"}},{"data":{"id":"4672","label":"mov eax, dword [rbp - 0x10]","color":"lightgrey"}},{"data":{"id":"4686","label":"mov eax, dword [rbp - 0x18]","color":"lightgrey"}},{"data":{"id":"4638","label":"lea rax, [rip + 0x2e5b]","color":"lightgrey"}},{"data":{"id":"4645","label":"movss xmm0, dword [rdx + rax]","color":"lightgrey"}},{"data":{"id":"4678","label":"jl 0x11d2","color":"lightgrey"}},{"data":{"id":"4472","label":"mov eax, dword [rbp - 0x24]","color":"lightgrey"}},{"data":{"id":"4484","label":"cmp dword [rbp - 8], 0","color":"lightgrey"}},{"data":{"id":"4490","label":"cmp dword [rbp - 0x2c], 0","color":"lightgrey"}},{"data":{"id":"4767","label":"ret","color":"lightcoral"}},{"data":{"id":"4594","label":"lea rax, [rip + 0x2f67]","color":"lightgrey"}},{"data":{"id":"4609","label":"movsxd rcx, eax","color":"lightgrey"}},{"data":{"id":"4766","label":"pop rbp","color":"lightcoral"}},{"data":{"id":"4580","label":"add rax, rdx","color":"lightgrey"}},{"data":{"id":"4500","label":"jle 0x119e","color":"lightgrey"}},{"data":{"id":"4571","label":"movsxd rdx, eax","color":"lightgrey"}},{"data":{"id":"4618","label":"mov rax, rdx","color":"lightgrey"}},{"data":{"id":"4650","label":"mulss xmm0, xmm1","color":"lightgrey"}},{"data":{"id":"4675","label":"cmp eax, dword [rbp - 0x2c]","color":"lightgrey"}},{"data":{"id":"4520","label":"mov dword [rbp - 0x18], 0","color":"lightgrey"}},{"data":{"id":"4488","label":"jle 0x119e","color":"lightgrey"}},{"data":{"id":"4683","label":"movsxd rcx, eax","color":"lightgrey"}},{"data":{"id":"4469","label":"mov dword [rbp - 0x30], ecx","color":"lightgrey"}},{"data":{"id":"4724","label":"movss dword [rdx + rax], xmm0","color":"lightgrey"}},{"data":{"id":"4755","label":"jl 0x11b4","color":"lightgrey"}},{"data":{"id":"4624","label":"add rax, rdx","color":"lightgrey"}},{"data":{"id":"4701","label":"add rax, rcx","color":"lightgrey"}},{"data":{"id":"4475","label":"mov dword [rbp - 8], eax","color":"lightgrey"}},{"data":{"id":"4736","label":"cmp eax, dword [rbp - 4]","color":"lightgrey"}},{"data":{"id":"4606","label":"mov eax, dword [rbp - 0x14]","color":"lightgrey"}},{"data":{"id":"4719","label":"movss xmm0, dword [rbp - 0xc]","color":"lightgrey"}},{"data":{"id":"4729","label":"add dword [rbp - 0x14], 1","color":"lightgrey"}},{"data":{"id":"4630","label":"lea rdx, [rax*4]","color":"lightgrey"}},{"data":{"id":"4463","label":"mov dword [rbp - 0x28], esi","color":"lightgrey"}},{"data":{"id":"4568","label":"mov eax, dword [rbp - 0x18]","color":"lightgrey"}},{"data":{"id":"4456","label":"push rbp","color":"lightgrey"}},{"data":{"id":"4562","label":"mov eax, dword [rbp - 0x10]","color":"lightgrey"}},{"data":{"id":"4532","label":"mov dword [rbp - 0x14], 0","color":"lightgrey"}},{"data":{"id":"4615","label":"movsxd rdx, eax","color":"lightgrey"}},{"data":{"id":"4553","label":"mov dword [rbp - 0x10], 0","color":"lightgrey"}},{"data":{"id":"4680","label":"mov eax, dword [rbp - 0x14]","color":"lightgrey"}},{"data":{"id":"4668","label":"add dword [rbp - 0x10], 1","color":"lightgrey"}},{"data":{"id":"4466","label":"mov dword [rbp - 0x2c], edx","color":"lightgrey"}},{"data":{"id":"4583","label":"add rax, rcx","color":"lightgrey"}},{"data":{"id":"4689","label":"movsxd rdx, eax","color":"lightgrey"}},{"data":{"id":"4692","label":"mov rax, rdx","color":"lightgrey"}},{"data":{"id":"4478","label":"mov eax, dword [rbp - 0x30]","color":"lightgrey"}},{"data":{"id":"4733","label":"mov eax, dword [rbp - 0x14]","color":"lightgrey"}},{"data":{"id":"4695","label":"add rax, rax","color":"lightgrey"}},{"data":{"id":"4704","label":"lea rdx, [rax*4]","color":"lightgrey"}},{"data":{"id":"4612","label":"mov eax, dword [rbp - 0x10]","color":"lightgrey"}},{"data":{"id":"4621","label":"add rax, rax","color":"lightgrey"}},{"data":{"id":"4601","label":"movss xmm1, dword [rdx + rax]","color":"lightgrey"}},{"data":{"id":"4560","label":"jmp 0x1240","color":"lightgrey"}},{"data":{"id":"4574","label":"mov rax, rdx","color":"lightgrey"}},{"data":{"id":"4586","label":"lea rdx, [rax*4]","color":"lightgrey"}},{"data":{"id":"4698","label":"add rax, rdx","color":"lightgrey"}},{"data":{"id":"4481","label":"mov dword [rbp - 4], eax","color":"lightgrey"}},{"data":{"id":"4761","label":"mov eax, 0","color":"lightgrey"}},{"data":{"id":"4544","label":"pxor xmm0, xmm0","color":"lightgrey"}},{"data":{"id":"4515","label":"jmp 0x129e","color":"lightgrey"}},{"data":{"id":"4502","label":"mov eax, dword [rbp - 0x28]","color":"lightgrey"}},{"data":{"id":"exit","label":"EXIT NODE","color":"black"}}],"edges":[{"data":{"id":"4577_4580","source":"4577","target":"4580","color":"darkred"}},{"data":{"id":"4460_4463","source":"4460","target":"4463","color":"darkred"}},{"data":{"id":"4712_4719","source":"4712","target":"4719","color":"darkred"}},{"data":{"id":"4527_4749","source":"4527","target":"4749","color":"darkgreen"}},{"data":{"id":"4494_4510","source":"4494","target":"4510","color":"darkgreen"}},{"data":{"id":"4494_4496","source":"4494","target":"4496","color":"darkred"}},{"data":{"id":"4663_4668","source":"4663","target":"4668","color":"darkred"}},{"data":{"id":"4505_4508","source":"4505","target":"4508","color":"darkred"}},{"data":{"id":"4659_4663","source":"4659","target":"4663","color":"darkred"}},{"data":{"id":"4752_4755","source":"4752","target":"4755","color":"darkred"}},{"data":{"id":"4565_4568","source":"4565","target":"4568","color":"darkred"}},{"data":{"id":"4739_4544","source":"4739","target":"4544","color":"darkgreen"}},{"data":{"id":"4739_4745","source":"4739","target":"4745","color":"darkred"}},{"data":{"id":"4510_4515","source":"4510","target":"4515","color":"darkred"}},{"data":{"id":"4539_4733","source":"4539","target":"4733","color":"darkgreen"}},{"data":{"id":"4749_4752","source":"4749","target":"4752","color":"darkred"}},{"data":{"id":"4654_4659","source":"4654","target":"4659","color":"darkred"}},{"data":{"id":"4508_4520","source":"4508","target":"4520","color":"darkgreen"}},{"data":{"id":"4508_4510","source":"4508","target":"4510","color":"darkred"}},{"data":{"id":"4745_4749","source":"4745","target":"4749","color":"darkgreen"}},{"data":{"id":"4457_4460","source":"4457","target":"4460","color":"darkred"}},{"data":{"id":"4627_4630","source":"4627","target":"4630","color":"darkred"}},{"data":{"id":"4496_4500","source":"4496","target":"4500","color":"darkred"}},{"data":{"id":"4548_4553","source":"4548","target":"4553","color":"darkred"}},{"data":{"id":"4672_4675","source":"4672","target":"4675","color":"darkred"}},{"data":{"id":"4686_4689","source":"4686","target":"4689","color":"darkred"}},{"data":{"id":"4638_4645","source":"4638","target":"4645","color":"darkred"}},{"data":{"id":"4645_4650","source":"4645","target":"4650","color":"darkred"}},{"data":{"id":"4678_4562","source":"4678","target":"4562","color":"darkgreen"}},{"data":{"id":"4678_4680","source":"4678","target":"4680","color":"darkred"}},{"data":{"id":"4472_4475","source":"4472","target":"4475","color":"darkred"}},{"data":{"id":"4484_4488","source":"4484","target":"4488","color":"darkred"}},{"data":{"id":"4490_4494","source":"4490","target":"4494","color":"darkred"}},{"data":{"id":"4767_exit","source":"4767","target":"exit","color":"pink"}},{"data":{"id":"4594_4601","source":"4594","target":"4601","color":"darkred"}},{"data":{"id":"4609_4612","source":"4609","target":"4612","color":"darkred"}},{"data":{"id":"4766_4767","source":"4766","target":"4767","color":"darkred"}},{"data":{"id":"4580_4583","source":"4580","target":"4583","color":"darkred"}},{"data":{"id":"4500_4510","source":"4500","target":"4510","color":"darkgreen"}},{"data":{"id":"4500_4502","source":"4500","target":"4502","color":"darkred"}},{"data":{"id":"4571_4574","source":"4571","target":"4574","color":"darkred"}},{"data":{"id":"4618_4621","source":"4618","target":"4621","color":"darkred"}},{"data":{"id":"4650_4654","source":"4650","target":"4654","color":"darkred"}},{"data":{"id":"4675_4678","source":"4675","target":"4678","color":"darkred"}},{"data":{"id":"4520_4527","source":"4520","target":"4527","color":"darkred"}},{"data":{"id":"4488_4510","source":"4488","target":"4510","color":"darkgreen"}},{"data":{"id":"4488_4490","source":"4488","target":"4490","color":"darkred"}},{"data":{"id":"4683_4686","source":"4683","target":"4686","color":"darkred"}},{"data":{"id":"4469_4472","source":"4469","target":"4472","color":"darkred"}},{"data":{"id":"4724_4729","source":"4724","target":"4729","color":"darkred"}},{"data":{"id":"4755_4532","source":"4755","target":"4532","color":"darkgreen"}},{"data":{"id":"4755_4761","source":"4755","target":"4761","color":"darkred"}},{"data":{"id":"4624_4627","source":"4624","target":"4627","color":"darkred"}},{"data":{"id":"4701_4704","source":"4701","target":"4704","color":"darkred"}},{"data":{"id":"4475_4478","source":"4475","target":"4478","color":"darkred"}},{"data":{"id":"4736_4739","source":"4736","target":"4739","color":"darkred"}},{"data":{"id":"4606_4609","source":"4606","target":"4609","color":"darkred"}},{"data":{"id":"4719_4724","source":"4719","target":"4724","color":"darkred"}},{"data":{"id":"4729_4733","source":"4729","target":"4733","color":"darkgreen"}},{"data":{"id":"4630_4638","source":"4630","target":"4638","color":"darkred"}},{"data":{"id":"4463_4466","source":"4463","target":"4466","color":"darkred"}},{"data":{"id":"4568_4571","source":"4568","target":"4571","color":"darkred"}},{"data":{"id":"4456_4457","source":"4456","target":"4457","color":"darkred"}},{"data":{"id":"4562_4565","source":"4562","target":"4565","color":"darkred"}},{"data":{"id":"4532_4539","source":"4532","target":"4539","color":"darkred"}},{"data":{"id":"4615_4618","source":"4615","target":"4618","color":"darkred"}},{"data":{"id":"4553_4560","source":"4553","target":"4560","color":"darkred"}},{"data":{"id":"4680_4683","source":"4680","target":"4683","color":"darkred"}},{"data":{"id":"4668_4672","source":"4668","target":"4672","color":"darkgreen"}},{"data":{"id":"4466_4469","source":"4466","target":"4469","color":"darkred"}},{"data":{"id":"4583_4586","source":"4583","target":"4586","color":"darkred"}},{"data":{"id":"4689_4692","source":"4689","target":"4692","color":"darkred"}},{"data":{"id":"4692_4695","source":"4692","target":"4695","color":"darkred"}},{"data":{"id":"4478_4481","source":"4478","target":"4481","color":"darkred"}},{"data":{"id":"4733_4736","source":"4733","target":"4736","color":"darkred"}},{"data":{"id":"4695_4698","source":"4695","target":"4698","color":"darkred"}},{"data":{"id":"4704_4712","source":"4704","target":"4712","color":"darkred"}},{"data":{"id":"4612_4615","source":"4612","target":"4615","color":"darkred"}},{"data":{"id":"4621_4624","source":"4621","target":"4624","color":"darkred"}},{"data":{"id":"4601_4606","source":"4601","target":"4606","color":"darkred"}},{"data":{"id":"4560_4672","source":"4560","target":"4672","color":"darkgreen"}},{"data":{"id":"4574_4577","source":"4574","target":"4577","color":"darkred"}},{"data":{"id":"4586_4594","source":"4586","target":"4594","color":"darkred"}},{"data":{"id":"4698_4701","source":"4698","target":"4701","color":"darkred"}},{"data":{"id":"4481_4484","source":"4481","target":"4484","color":"darkred"}},{"data":{"id":"4761_4766","source":"4761","target":"4766","color":"darkgreen"}},{"data":{"id":"4544_4548","source":"4544","target":"4548","color":"darkred"}},{"data":{"id":"4515_4766","source":"4515","target":"4766","color":"darkgreen"}},{"data":{"id":"4502_4505","source":"4502","target":"4505","color":"darkred"}}]};
+         var dfm = {"4505":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["eax"],"line":"??\n??:0\n"},"4560":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rip"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4490":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4494":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["of","sf","zf"],"line":"??\n??:0\n"},"4701":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4621":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4481":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4594":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4478":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4553":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4729":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4654":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":["xmm1"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4689":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4733":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4724":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4704":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rdx"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4612":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4574":{"state":["rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{"rdx":["rax"]},"conversions":[],"line":"??\n??:0\n"},"4502":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4767":{"state":["rdx","rsp"],"state_outgoing":["rdx","rsp"],"added_regs":["rsp"],"removed_regs":["rip"],"copy_flow":{},"conversions":["rsp"],"line":"??\n??:0\n"},"4745":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4615":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4457":{"state":["rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{"rsp":["rbp"]},"conversions":[],"line":"??\n??:0\n"},"4609":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4618":{"state":["rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{"rdx":["rax"]},"conversions":[],"line":"??\n??:0\n"},"4469":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4698":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4761":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4624":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4672":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4508":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4749":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4510":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4496":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4456":{"state":[],"state_outgoing":["rsp"],"added_regs":["rsp"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4565":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4630":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rdx"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4472":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4580":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4736":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["eax"],"line":"??\n??:0\n"},"4475":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4686":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4695":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4766":{"state":["rbp","rdx","rsp"],"state_outgoing":["rdx","rsp"],"added_regs":["rsp"],"removed_regs":["rbp"],"copy_flow":{},"conversions":["rsp"],"line":"??\n??:0\n"},"4663":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4532":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4527":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":["rip"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4583":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4488":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["of","sf","zf"],"line":"??\n??:0\n"},"4562":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4515":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":["rip"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4548":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4752":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["eax"],"line":"??\n??:0\n"},"4539":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rip"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4466":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4500":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["of","sf","zf"],"line":"??\n??:0\n"},"4568":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4460":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4692":{"state":["rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{"rdx":["rax"]},"conversions":[],"line":"??\n??:0\n"},"4571":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4683":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4719":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":["xmm0"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4484":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4712":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4577":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4645":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":["xmm0"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4680":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4638":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4659":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4627":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rax"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4650":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4739":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["of","sf"],"line":"??\n??:0\n"},"4606":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["rax"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4520":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4678":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["of","sf"],"line":"??\n??:0\n"},"4586":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":["rdx"],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4668":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4675":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["eax"],"line":"??\n??:0\n"},"4755":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":["of","sf"],"line":"??\n??:0\n"},"4463":{"state":["rbp","rsp"],"state_outgoing":["rbp","rsp"],"added_regs":[],"removed_regs":[],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4601":{"state":["rax","rbp","rdx","rsp"],"state_outgoing":["rax","rbp","rdx","rsp"],"added_regs":[],"removed_regs":["xmm1"],"copy_flow":{},"conversions":[],"line":"??\n??:0\n"},"4544":{"state":["rbp","rdx","rsp"],"state_outgoing":["rbp","rdx","rsp"],"added_regs":[],"removed_regs":["xmm0h","xmm0l"],"copy_flow":{},"conversions":["xmm0h","xmm0l"],"line":"??\n??:0\n"}};
+         var esil = {"4500":"of, sf, ^, zf, |, ?{, 4510, rip, =, }","4457":"rsp, rbp, =","4695":"rax, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4520":"0, 0x18, rbp, -, =[4]","4494":"of, sf, ^, zf, |, ?{, 4510, rip, =, }","4719":"0xc, rbp, -, [4], xmm0, =","4627":"rcx, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4583":"rcx, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4609":"32, eax, ~, rcx, =","4645":"rax, rdx, +, [4], xmm0, =","4496":"0, 0x4, rbp, -, [4], ==, $z, zf, :=, 32, $b, cf, :=, $p, pf, :=, 31, $s, sf, :=, 0, 0x80000000, -, !, 31, $o, ^, of, :=, 3, $b, af, :=","4571":"32, eax, ~, rdx, =","4678":"of, sf, ^, ?{, 4562, rip, =, }","4712":"0x2f31, rip, +, rax, =","4767":"rsp, [8], rip, =, 8, rsp, +=","4580":"rdx, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4724":"xmm0, rax, rdx, +, =[4]","4456":"rbp, 8, rsp, -, =[8], 8, rsp, -=","4733":"0x14, rbp, -, [4], rax, =","4698":"rdx, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4460":"edi, 0x24, rbp, -, =[4]","4568":"0x18, rbp, -, [4], rax, =","4484":"0, 0x8, rbp, -, [4], ==, $z, zf, :=, 32, $b, cf, :=, $p, pf, :=, 31, $s, sf, :=, 0, 0x80000000, -, !, 31, $o, ^, of, :=, 3, $b, af, :=","4478":"0x30, rbp, -, [4], rax, =","4668":"1, 0x10, rbp, -, +=[4], 31, $o, of, :=, 31, $s, sf, :=, $z, zf, :=, 31, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4527":"0x128d, rip, =","4539":"0x127d, rip, =","4475":"eax, 0x8, rbp, -, =[4]","4663":"xmm0, 0xc, rbp, -, =[4]","4490":"0, 0x2c, rbp, -, [4], ==, $z, zf, :=, 32, $b, cf, :=, $p, pf, :=, 31, $s, sf, :=, 0, 0x80000000, -, !, 31, $o, ^, of, :=, 3, $b, af, :=","4736":"0x4, rbp, -, [4], eax, ==, $z, zf, :=, 32, $b, cf, :=, $p, pf, :=, 31, $s, sf, :=, 0x4, rbp, -, [4], 0x80000000, -, !, 31, $o, ^, of, :=, 3, $b, af, :=","4553":"0, 0x10, rbp, -, =[4]","4612":"0x10, rbp, -, [4], rax, =","4574":"rdx, rax, =","4515":"0x129e, rip, =","4624":"rdx, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4466":"edx, 0x2c, rbp, -, =[4]","4680":"0x14, rbp, -, [4], rax, =","4621":"rax, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4508":"zf, ?{, 4520, rip, =, }","4565":"32, eax, ~, rcx, =","4618":"rdx, rax, =","4577":"rax, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4650":"32, 32, xmm1, F2D, 32, xmm0, F2D, F*, D2F, xmm0, =","4752":"0x8, rbp, -, [4], eax, ==, $z, zf, :=, 32, $b, cf, :=, $p, pf, :=, 31, $s, sf, :=, 0x8, rbp, -, [4], 0x80000000, -, !, 31, $o, ^, of, :=, 3, $b, af, :=","4729":"1, 0x14, rbp, -, +=[4], 31, $o, of, :=, 31, $s, sf, :=, $z, zf, :=, 31, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4755":"of, sf, ^, ?{, 4532, rip, =, }","4701":"rcx, rax, +=, 63, $o, of, :=, 63, $s, sf, :=, $z, zf, :=, 63, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4532":"0, 0x14, rbp, -, =[4]","4510":"999, rax, =","4560":"0x1240, rip, =","4594":"0x2f67, rip, +, rax, =","4463":"esi, 0x28, rbp, -, =[4]","4601":"rax, rdx, +, [4], xmm1, =","4704":"rax, 4, *, rdx, =","4654":"0xc, rbp, -, [4], xmm1, =","4502":"0x28, rbp, -, [4], rax, =","4686":"0x18, rbp, -, [4], rax, =","4638":"0x2e5b, rip, +, rax, =","4683":"32, eax, ~, rcx, =","4615":"32, eax, ~, rdx, =","4659":"32, 32, xmm1, F2D, 32, xmm0, F2D, F+, D2F, xmm0, =","4761":"0, rax, =","4472":"0x24, rbp, -, [4], rax, =","4505":"0x2c, rbp, -, [4], eax, ==, $z, zf, :=, 32, $b, cf, :=, $p, pf, :=, 31, $s, sf, :=, 0x2c, rbp, -, [4], 0x80000000, -, !, 31, $o, ^, of, :=, 3, $b, af, :=","4672":"0x10, rbp, -, [4], rax, =","4562":"0x10, rbp, -, [4], rax, =","4544":"xmm0l, xmm0l, ^=, xmm0h, xmm0h, ^=","4548":"xmm0, 0xc, rbp, -, =[4]","4675":"0x2c, rbp, -, [4], eax, ==, $z, zf, :=, 32, $b, cf, :=, $p, pf, :=, 31, $s, sf, :=, 0x2c, rbp, -, [4], 0x80000000, -, !, 31, $o, ^, of, :=, 3, $b, af, :=","4586":"rax, 4, *, rdx, =","4481":"eax, 0x4, rbp, -, =[4]","4692":"rdx, rax, =","4749":"0x18, rbp, -, [4], rax, =","4745":"1, 0x18, rbp, -, +=[4], 31, $o, of, :=, 31, $s, sf, :=, $z, zf, :=, 31, $c, cf, :=, $p, pf, :=, 3, $c, af, :=","4630":"rax, 4, *, rdx, =","4689":"32, eax, ~, rdx, =","4766":"rsp, [8], 8, rsp, +=, rbp, =","4739":"of, sf, ^, ?{, 4544, rip, =, }","4469":"ecx, 0x30, rbp, -, =[4]","4488":"of, sf, ^, zf, |, ?{, 4510, rip, =, }","4606":"0x14, rbp, -, [4], rax, ="};
+         var disasm = {"4645":"movss xmm0, dword [rdx + rax]","4701":"add rax, rcx","4766":"pop rbp","4630":"lea rdx, [rax*4]","4460":"mov dword [rbp - 0x24], edi","4560":"jmp 0x1240","4548":"movss dword [rbp - 0xc], xmm0","4505":"cmp eax, dword [rbp - 0x2c]","4615":"movsxd rdx, eax","4562":"mov eax, dword [rbp - 0x10]","4695":"add rax, rax","4508":"je 0x11a8","4729":"add dword [rbp - 0x14], 1","4704":"lea rdx, [rax*4]","4733":"mov eax, dword [rbp - 0x14]","4698":"add rax, rdx","4515":"jmp 0x129e","4761":"mov eax, 0","4663":"movss dword [rbp - 0xc], xmm0","4520":"mov dword [rbp - 0x18], 0","4463":"mov dword [rbp - 0x28], esi","4736":"cmp eax, dword [rbp - 4]","4638":"lea rax, [rip + 0x2e5b]","4568":"mov eax, dword [rbp - 0x18]","4745":"add dword [rbp - 0x18], 1","4494":"jle 0x119e","4488":"jle 0x119e","4472":"mov eax, dword [rbp - 0x24]","4692":"mov rax, rdx","4544":"pxor xmm0, xmm0","4496":"cmp dword [rbp - 4], 0","4490":"cmp dword [rbp - 0x2c], 0","4606":"mov eax, dword [rbp - 0x14]","4627":"add rax, rcx","4650":"mulss xmm0, xmm1","4755":"jl 0x11b4","4624":"add rax, rdx","4612":"mov eax, dword [rbp - 0x10]","4749":"mov eax, dword [rbp - 0x18]","4767":"ret","4601":"movss xmm1, dword [rdx + rax]","4739":"jl 0x11c0","4609":"movsxd rcx, eax","4571":"movsxd rdx, eax","4618":"mov rax, rdx","4683":"movsxd rcx, eax","4532":"mov dword [rbp - 0x14], 0","4510":"mov eax, 0x3e7","4680":"mov eax, dword [rbp - 0x14]","4594":"lea rax, [rip + 0x2f67]","4621":"add rax, rax","4478":"mov eax, dword [rbp - 0x30]","4481":"mov dword [rbp - 4], eax","4675":"cmp eax, dword [rbp - 0x2c]","4577":"add rax, rax","4668":"add dword [rbp - 0x10], 1","4456":"push rbp","4539":"jmp 0x127d","4689":"movsxd rdx, eax","4502":"mov eax, dword [rbp - 0x28]","4719":"movss xmm0, dword [rbp - 0xc]","4565":"movsxd rcx, eax","4724":"movss dword [rdx + rax], xmm0","4475":"mov dword [rbp - 8], eax","4574":"mov rax, rdx","4466":"mov dword [rbp - 0x2c], edx","4678":"jl 0x11d2","4484":"cmp dword [rbp - 8], 0","4580":"add rax, rdx","4586":"lea rdx, [rax*4]","4469":"mov dword [rbp - 0x30], ecx","4553":"mov dword [rbp - 0x10], 0","4672":"mov eax, dword [rbp - 0x10]","4500":"jle 0x119e","4686":"mov eax, dword [rbp - 0x18]","4712":"lea rax, [rip + 0x2f31]","4659":"addss xmm0, xmm1","4654":"movss xmm1, dword [rbp - 0xc]","4583":"add rax, rcx","4527":"jmp 0x128d","4457":"mov rbp, rsp","4752":"cmp eax, dword [rbp - 8]"};
+         var conv = {"4638":{},"4645":{},"4695":{},"4594":{},"4484":{},"4729":{},"4502":{},"4689":{},"4527":{},"4606":{},"4698":{},"4654":{},"4767":{"rsp":["4766"]},"4463":{},"4719":{},"4515":{},"4659":{},"4733":{},"4755":{},"4621":{},"4478":{},"4739":{},"4630":{},"4701":{},"4520":{},"4618":{},"4627":{},"4683":{},"4488":{},"4749":{},"4766":{"rsp":["4456"]},"4672":{},"4580":{},"4686":{},"4539":{},"4460":{},"4500":{},"4761":{},"4612":{},"4475":{},"4560":{},"4571":{},"4586":{},"4752":{},"4704":{},"4505":{},"4457":{},"4466":{},"4490":{},"4494":{},"4562":{},"4736":{},"4577":{},"4481":{},"4680":{},"4532":{},"4692":{},"4675":{},"4650":{},"4508":{},"4624":{},"4565":{},"4544":{},"4745":{},"4609":{},"4668":{},"4456":{},"4601":{},"4548":{},"4469":{},"4712":{},"4583":{},"4724":{},"4568":{},"4574":{},"4615":{},"4496":{},"4663":{},"4678":{},"4510":{},"4553":{},"4472":{}};
+         var indicators = null;
+
+
+         cytoscape({
+             container: document.getElementById('cy'),
+             elements: graph,
+             layout: {name: 'dagre'},
+             style: cytoscape.stylesheet()
+                             .selector('node')
+                             .css({
+                                 content: 'data(label)',
+                                 shape: 'roundrectangle',
+                                 'background-color': 'data(color)',
+                                 'text-valign': 'center',
+                                 'text-halign': 'center',
+                                 width: '15em',
+                                 height: '1.5em',
+                                 'border-width': '.1em',
+                                 'font-family': 'monospace'
+                             })
+                             .selector('edge')
+                             .css({
+                                 'line-color': 'data(color)',
+                                 'target-arrow-color': 'data(color)',
+                                 'target-arrow-shape': 'triangle',
+                                 'target-arrow-scale': 3.5,
+                                 'curve-style': 'bezier',
+                             }),
+             ready: function() { window.cy = this; }
+         });
+         cy.on('tap', 'node', function(evt) {
+             var id = evt.target.id();
+             $('#selected').text("0x" + parseInt(id, 10).toString(16));
+             $('#tainted').children().remove();
+             $('#tainted').append(
+                 $.map(dfm[id]['state'], (elem) => $('<span class="badge text-bg-light" style="margin-left:.5em;"></span>').text(elem)));
+             $('#added').children().remove();
+             $('#added').append(
+                 $.map(dfm[id]['added_regs'], (elem) => $('<span class="badge text-bg-danger" style="margin-left:.5em;"></span>').text(elem)));
+             $('#removed').children().remove();
+             $('#removed').append(
+                 $.map(dfm[id]['removed_regs'], (elem) => $('<span class="badge text-bg-success style="margin-left:.5em;"></span>').text(elem)));
+
+             $('#line').text(dfm[id]['line']);
+
+             $('#copy').children().remove();
+             for (source in dfm[id]['copy_flow']) {
+                 $('#copy').append($('<span class="badge text-bg-success style="margin-left:.5em;"></span>').text(source));
+                 $('#copy').append($('<span>→</span>'));
+                 $('#copy').append($.map(dfm[id]['copy_flow'][source], (elem) => $('<span class="badge text-bg-success style="margin-left:.5em;"></span>').text(elem)));
+                 $('#copy').append($('<br>'));
+             }
+
+
+
+             $('#conversions').children().remove();
+             $('#conversions').append(
+                 $.map(dfm[id]['conversions'], (elem) => $('<span class="badge text-bg-warning" style="margin-left:.5em;" onclick="highlightConversion(\'' + id + '\',\'' + elem + '\')" ></span>').text(elem)));
+             $('#disasm').text(disasm[id]);
+             $('#esil').text(esil[id]);
+         });
+         cy.$('node').lock();
+         cy.$('edge').lock();
+         function highlightReg(reg) {
+             resetHighlights();
+
+             $('#highlight-type').text("Nodes with following potentially tainted Register: ")
+             $('#highlight-obj').text(reg)
+
+             $('#select-list a').removeClass('active');
+             if (typeof reg !== 'undefined') {
+                 $.each(dfm, function (elem) {
+                     if (dfm[elem]['state'].includes(reg)) {
+                         cy.$('node[id="' + elem + '"]').css('border-color', 'red');
+                         cy.$('node[id="' + elem + '"]').css('border-width', '.5em');
+                     }
+                 })
+                 $('#select-list a').filter(function() {
+                     return $(this).text() == reg;
+                 }).addClass('active');
+             } else {
+                 $('#select-list a').filter(function() {
+                     return $(this).text() == "None";
+                 }).addClass('active');
+             }
+         }
+         function highlightTaintingNode(reg) {
+             resetHighlights();
+
+             $('#highlight-type').text("Nodes tainting following Register: ")
+             $('#highlight-obj').text(reg)
+
+             $('#select-list-tainting a').removeClass('active');
+             if (typeof reg !== 'undefined') {
+                 $.each(dfm, function (elem) {
+                     if (dfm[elem]['added_regs'].includes(reg)) {
+                         cy.$('node[id="' + elem + '"]').css('border-color', 'red');
+                         cy.$('node[id="' + elem + '"]').css('border-width', '.5em');
+                     }
+                     if (dfm[elem]['removed_regs'].includes(reg)) {
+                         cy.$('node[id="' + elem + '"]').css('border-color', 'green');
+                         cy.$('node[id="' + elem + '"]').css('border-width', '.5em');
+                     }
+                 })
+                 $('#select-list-tainting a').filter(function() {
+                     return $(this).text() == reg;
+                 }).addClass('active');
+             } else {
+                 $('#select-list-tainting a').filter(function() {
+                     return $(this).text() == "None";
+                 }).addClass('active');
+             }
+         }
+         function resetHighlights() {
+             cy.$('node').css('border-color', 'black');
+             cy.$('node').css('border-width', '.1em');
+         }
+
+         function highlightConversion(block, reg) {
+             resetHighlights();
+
+             $('#highlight-type').text("Conversion (in blue BB) because reaching definitions (from red BBs) for Reg: ");
+             $('#highlight-obj').text(reg + "(" + "0x" + parseInt(block, 10).toString(16)+ ")");
+
+             $('#select-list-tainting a').removeClass('active');
+             $('#select-list a').removeClass('active');
+
+             console.log(conv);
+             console.log(conv[block][reg]);
+             $.each(conv[block][reg], function (elem) {
+                console.log(elem);
+                 cy.$('node[id="' + conv[block][reg][elem] + '"]').css('border-color', 'red');
+                 cy.$('node[id="' + conv[block][reg][elem] + '"]').css('border-width', '.5em');
+             })
+            cy.$('node[id="' + block + '"]').css('border-color', 'blue');
+            cy.$('node[id="' + block + '"]').css('border-width', '.5em');
+         }
+
+         function calculate_scores() {
+             var ops = new Map(
+                 [      ['Min',    x => Math.min(...x)]
+                      , ['Max',    x => Math.max(...x)]
+                      , ['Mean',   x => x.reduce((a,b) => a + b, 0) / x.length]
+                      , ['Median', x => ((x.length % 2) ? (x[Math.floor(x.length / 2)]) : ((x[Math.floor(x.length / 2)] + x[Math.floor(x.length / 2) - 1]) / 2))]
+                      , ['Sum',    x => x.reduce((a,b) => a + b, 0)]
+                      , ['Count',  x => x.length]
+                 ]);
+
+             for (let [op1, fn1] of ops) {
+                 var txt1 = 'Critical Instructions ' + op1 + ': ';
+                 $('#metric-list').append($('<dt>' + txt1 + '</dt><dd class="' + op1 + '" + id="' + op1 + '"></dd>'));
+                 if (op1 == 'Count') {
+                     $('#' + op1).append("" + fn1(indicators['critical_insns']));
+                 } else {
+                    for (let [op2, fn2] of ops) {
+                        var txt2 = 'Pair ' + op2 + ': ';
+                        $('#' + op1).append($('<dl class="row"><dt>' + txt2 + '</dt><dd class="' + op2 + '" id="' + op1 + op2 + '"></dd></dl>'));
+                        if (op2 == 'Count') {
+                            $('#' + op1 + op2).append("" + fn1(indicators['critical_insns'].map(x => fn2(x['pairs']))));
+                        } else {
+                            for (let [op3, fn3] of ops) {
+                                var txt3 = 'Path Distance ' + op3 + ': ';
+                                $('#' + op1 + op2).append($('<dl class="row"><dt>' + txt3 + '</dt><dd class="' + op3 + '" id="' + op1 + op2 + op3 + '"></dd></dl>'));
+                                $('#' + op1 + op2 + op3).append("" +
+                                                                fn1(indicators['critical_insns'].map(x => fn2(x['pairs'].map(y => fn3(y['paths'].map(z => z['distance'])))))));
+                            }
+                        }
+                    }
+                 }
+             }
+         }
+
+
+         calculate_scores();
+        </script>
+        
+    </body>
+</html>
