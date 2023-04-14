@@ -1,0 +1,13 @@
+rule compile
+  command = $cc $cflags -o $out $in -Iembench-support -DCPU_MHZ=1 -DWARMUP_HEAT=1 --sysroot=$libdir
+
+rule compile-native
+  command = $cc $cflags -o $out  $in -Iembench-support -DCPU_MHZ=1 -DWARMUP_HEAT=1 ; $objcopy --remove-section .rela.text $out ; $strip -X $out
+
+rule run-fixup
+  command = rm -rf $out ; mkdir -p $out ; ./fixup.sh $in $in.fixup ; RUST_BACKTRACE=1 timeout 12000 ../target/debug/open-rns-analyzer -i $in -o $out --fixup-file $in.fixup calculate-dataflow --footer-file ./footer 2> $out.log
+
+rule run
+  command = rm -rf $out ; mkdir -p $out ; RUST_BACKTRACE=1 timeout 12000 ../target/debug/open-rns-analyzer -i $in -o $out calculate-dataflow --footer-file ./footer 2> $out.log
+
+include all-stuff.ninja
