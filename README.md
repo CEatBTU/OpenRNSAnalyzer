@@ -7,7 +7,7 @@ A installation of Radare2 is required for this tool to work.
 
 ## Result Examples
 
-TODO
+An example for the output of this tool can be found [here](https://ceatbtu.github.io/OpenRNSAnalyzer/).
 
 ## Building
 
