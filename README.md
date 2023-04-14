@@ -2,7 +2,7 @@
 
 This tool is designed to analyze dataflow in binaries for architectures with a datapath utilizing redundant number systems.
 The main command is calculate-dataflow, which does dataflow analysis on binary file and outputs the result as HTML.
-Internally it is based on ![Radare2](https://github.com/radareorg/radare2/).
+Internally it is based on [Radare2](https://github.com/radareorg/radare2/).
 A installation of Radare2 is required for this tool to work.
 
 ## Result Examples
